@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-card-text class="ma-0 pa-0 text-body-1">
     <todo-input
       v-on:add="addTodo"
     />
@@ -10,7 +10,7 @@
       v-on:done="doneTodo"
       v-on:remove="removeTodo"
     />
-  </div>
+  </v-card-text>
 </template>
 
 <script lang="ts">

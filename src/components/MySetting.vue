@@ -1,20 +1,15 @@
 <template>
-  <div>
-    <button style="width:100%" v-on:click="onSet">設定</button>
-    <div style="margin-top:10px">
+  <v-card-text class="ma-0 pa-0 text-body-1">
+    <v-btn style="width:100%" v-on:click="onSet">設定</v-btn>
+    <v-card-text class="mt-3 pa-0 text-body-1">
       <span>年月日表記:</span>
-      <div>
-        <input type="radio" id="date1" name="date" value="1" v-on:change="selectDateType1" v-bind:checked="state.dateType == 1" />
-        <label for="date1">{{ state.dateType1String }}</label>
-        <input type="radio" id="date2" name="date" value="2" v-on:change="selectDateType2" v-bind:checked="state.dateType == 2" />
-        <label for="date2">{{ state.dateType2String }}</label>
-      </div>
-    </div>
-    <div style="margin-top:10px">
-      <input type="checkbox" id="disp-year" v-on:change="changeCheckYear" v-bind:checked="state.dispYear" />
-      <label for="disp-year">年を表示する</label>
-    </div>
-  </div>
+    </v-card-text>
+    <v-radio-group inline v-model="state.dateType" hide-details>
+      <v-radio v-bind:label="state.dateType1String" v-bind:value="1" v-on:change="selectDateType1" />
+      <v-radio v-bind:label="state.dateType2String" v-bind:value="2" v-on:change="selectDateType2" />
+    </v-radio-group>
+    <v-checkbox label="年を表示する" v-model="state.dispYear" v-on:change="changeCheckYear" hide-details />
+  </v-card-text>
 </template>
 
 <script lang="ts">
@@ -51,13 +46,13 @@ export default defineComponent({
       router.back()
     }
     const selectDateType1 = () => {
-      state.dateType = 1
+      console.log('selectDateType1')
     }
     const selectDateType2 = () => {
-      state.dateType = 2
+      console.log('selectDateType2')
     }
     const changeCheckYear = () => {
-      state.dispYear = !state.dispYear
+      console.log('changeCheckYear')
       state.dateType1String = state.dispYear ? 'YYYY年MM月DD日' : 'MM月DD日'
       state.dateType2String = state.dispYear ? 'YY/MM/DD' : 'MM/DD'
     }
