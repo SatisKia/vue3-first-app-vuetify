@@ -113,6 +113,7 @@ export default defineComponent({
 
 <style scoped>
 .table {
+  width: 100%;
   border: 0;
 }
 .td {
