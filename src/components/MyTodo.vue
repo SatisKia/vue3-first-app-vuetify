@@ -3,22 +3,36 @@
     <todo-input
       v-on:add="addTodo"
     />
-    <todo-label
-      v-for="todo in sortedTodo"
-      v-bind:key="todo.id"
-      v-bind:todo="todo"
-      v-on:done="doneTodo"
-      v-on:remove="removeTodo"
-    />
+    <v-tabs align-tabs="center" v-model="tab">
+      <v-tab width="50%" value="active">ACTIVE</v-tab>
+      <v-tab width="50%" value="log">LOG</v-tab>
+    </v-tabs>
+    <v-tabs-window v-model="tab">
+      <v-tabs-window-item class="pb-1" value="active">
+        <todo-label
+          v-for="todo in sortedTodo"
+          v-bind:key="todo.id"
+          v-bind:todo="todo"
+          v-on:done="doneTodo"
+          v-on:remove="removeTodo"
+        />
+      </v-tabs-window-item>
+      <v-tabs-window-item class="pb-1" value="log">
+        <todo-label
+          v-for="todo in removedTodo"
+          v-bind:key="todo.id"
+          v-bind:todo="todo"
+        />
+      </v-tabs-window-item>
+    </v-tabs-window>
   </v-card-text>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted } from 'vue'
+import { computed, defineComponent, onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted, ref, watch } from 'vue'
 import { Todo } from '@/types/todo'
 import TodoInput from '@/components/TodoInput.vue'
 import TodoLabel from '@/components/TodoLabel.vue'
-import MyCookie from '@/plugins/Cookie'
 import store from '@/store'
 
 export default defineComponent({
@@ -27,57 +41,30 @@ export default defineComponent({
     TodoLabel
   },
   setup () {
+    const tab = ref('sctive')
+    watch([tab], ([newVal]) => {
+      console.log(newVal)
+    })
+
     // methods
     const loadData = async () => {
       console.log('loadData')
 
-      // データの読み込み処理
-      store.dispatch('initialize')
-      const cookie: MyCookie = new MyCookie()
-      for (let i = 0; ; i++) {
-        const id = cookie.getValue('id' + i, '')
-        if (id.length === 0) {
-          break
-        }
-        const done = cookie.getBool('done' + i, false)
-        const date = new Date(cookie.getNumber('date' + i, 0))
-        const text = cookie.getValue('text' + i, '')
-        const color = cookie.getValue('color' + i, '')
-        store.dispatch('push', {
-          todo: {
-            id: id,
-            done: done,
-            date: date,
-            text: text,
-            color: color
-          }
-        })
-      }
-      store.dispatch('setDateType', { dateType: cookie.getNumber('dateType', 1) })
-      store.dispatch('setDispYear', { dispYear: cookie.getBool('dispYear', true) })
+      // データの読み込み
+      store.dispatch('loadData')
     }
     const saveData = () => {
       console.log('saveData')
 
-      // データの書き込み処理
-      const todoList = store.getters.todoList
-      const cookie: MyCookie = new MyCookie()
-      let i = 0
-      for (; i < todoList.length; i++) {
-        const todo = todoList[i]
-        cookie.setValue('id' + i, todo.id)
-        cookie.setBool('done' + i, todo.done)
-        cookie.setNumber('date' + i, todo.date.getTime())
-        cookie.setValue('text' + i, todo.text)
-        cookie.setValue('color' + i, todo.color)
-      }
-      cookie.setValue('id' + i, '')
+      // データの書き込み
+      store.dispatch('saveData')
     }
     const addTodo = (text: string, color: string) => {
       store.dispatch('add', {
         todo: {
           id: (new Date()).getTime().toString(),
           done: false,
+          removed: false,
           date: new Date(),
           text: text,
           color: color
@@ -97,10 +84,16 @@ export default defineComponent({
     // computed
     const sortedTodo = computed(() => {
       // 算出プロパティではデータを直接変更することができないため、sliceで配列をコピー
-      const todoList = store.getters.todoList.slice()
+      let todoList = store.getters.todoList.slice()
+      todoList = todoList.filter((todo: { removed: boolean }) => todo.removed !== true)
       return todoList.sort((a: Todo, b: Todo) => {
         return b.date.getTime() - a.date.getTime()
       })
+    })
+    const removedTodo = computed(() => {
+      // 算出プロパティではデータを直接変更することができないため、sliceで配列をコピー
+      const todoList = store.getters.todoList.slice()
+      return todoList.filter((todo: { removed: boolean }) => todo.removed === true)
     })
 
     onBeforeMount(() => {
@@ -127,10 +120,12 @@ export default defineComponent({
 
     // template内で使用するプロパティ
     return {
+      tab,
       addTodo,
       removeTodo,
       doneTodo,
-      sortedTodo
+      sortedTodo,
+      removedTodo
     }
   }
 })

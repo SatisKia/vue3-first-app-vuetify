@@ -4,17 +4,17 @@
       <table class="table">
         <tbody>
           <tr>
-            <td class="td" style="width:5%">
+            <td v-if="!todo.removed" class="td" style="width:5%">
               <v-checkbox class="d-flex" v-model="state.todoDone" v-on:change="done" hide-details />
             </td>
-            <td class="td" style="width:20%">
+            <td v-if="store.getters.dateType !== 3" class="td" style="width:20%">
               <span>{{ date }}</span>
             </td>
-            <td class="td" style="width:65%">
+            <td class="td" v-bind:style="{ 'width': ((store.getters.dateType !== 3) ? (!todo.removed ? '65%' : '80%') : (!todo.removed ? '85%' : '100%')) }">
               <span>{{ todo.text }}</span>
             </td>
-            <td class="td" style="width:10%">
-              <v-btn v-if="todo.done" variant="plain" style="width:100%" v-bind:style="{ 'background-color': (todo.done ? '#808080' : todo.color) }" v-on:click="remove">消</v-btn>
+            <td v-if="!todo.removed" class="td" style="width:10%">
+              <v-btn v-if="todo.done" variant="plain" style="width:100%; min-width:100%" v-bind:style="{ 'background-color': (todo.done ? '#808080' : todo.color) }" v-on:click="remove">消</v-btn>
             </td>
           </tr>
         </tbody>
@@ -102,6 +102,7 @@ export default defineComponent({
     })
 
     return {
+      store,
       state,
       done,
       remove,
@@ -114,6 +115,7 @@ export default defineComponent({
 <style scoped>
 .table {
   width: 100%;
+  min-height: 48px;
   border: 0;
 }
 .td {
